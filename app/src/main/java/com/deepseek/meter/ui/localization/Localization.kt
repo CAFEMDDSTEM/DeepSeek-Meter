@@ -143,7 +143,7 @@ private val ZH = mapOf(
 
 private val RU = mapOf(
     S.login to "Войти", S.refresh to "Обновить", S.settings to "Настройки", S.overview to "Обзор", S.models to "Модели",
-    S.close to "Закрыть", S.back to "Назад", S.retry to "Повторить", S.officialRecharge to "Официальное пополнение",
+    S.close to "Закрыть", S.back to "Назад", S.retry to "Повторить", S.officialRecharge to "пополнение",
     S.sameSession to "Страница использует текущую сессию", S.notLoggedIn to "DeepSeek не подключён",
     S.loginDesc to "Войдите, чтобы видеть баланс, расходы за день и месяц, модели и динамику токенов.",
     S.loginDeepSeek to "Войти в DeepSeek", S.loadingData to "Загрузка данных DeepSeek…",
