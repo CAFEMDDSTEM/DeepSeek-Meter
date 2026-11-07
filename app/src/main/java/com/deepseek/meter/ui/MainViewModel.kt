@@ -5,8 +5,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.deepseek.meter.data.api.ApiException
 import com.deepseek.meter.data.model.AppSettings
+import com.deepseek.meter.data.model.AppUpdateInfo
+import com.deepseek.meter.data.model.DeepSeekServiceStatus
 import com.deepseek.meter.data.model.DashboardSnapshot
 import com.deepseek.meter.data.repository.DashboardRepository
+import com.deepseek.meter.data.repository.StatusRepository
+import com.deepseek.meter.data.repository.UpdateChecker
 import com.deepseek.meter.data.store.SecureTokenStore
 import com.deepseek.meter.data.store.SettingsStore
 import com.deepseek.meter.notification.NotificationCoordinator
@@ -27,6 +31,7 @@ import java.time.Instant
 enum class AppSection {
     Overview,
     Models,
+    Status,
     Settings,
 }
 
@@ -40,12 +45,21 @@ data class MainUiState(
     val settings: AppSettings = AppSettings(),
     val errorMessage: String? = null,
     val lastUpdated: Instant? = null,
+    val serviceStatus: DeepSeekServiceStatus? = null,
+    val statusLoading: Boolean = true,
+    val statusError: String? = null,
+    val statusBannerDismissed: Boolean = false,
+    val updateInfo: AppUpdateInfo? = null,
+    val updateChecking: Boolean = false,
+    val updateMessage: String? = null,
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val tokenStore = SecureTokenStore(application)
     private val settingsStore = SettingsStore(application)
     private val repository = DashboardRepository()
+    private val statusRepository = StatusRepository()
+    private val updateChecker = UpdateChecker()
     private val notificationCoordinator = NotificationCoordinator(application, settingsStore)
 
     private val mutableUiState = MutableStateFlow(MainUiState())
@@ -58,6 +72,77 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     init {
         observeSession()
         observeSettings()
+        startStatusPolling()
+        checkForUpdates(manual = false)
+    }
+
+    fun refreshStatus() {
+        viewModelScope.launch { refreshStatusInternal(showLoading = true) }
+    }
+
+    fun dismissStatusBanner() {
+        mutableUiState.value = mutableUiState.value.copy(statusBannerDismissed = true)
+    }
+
+    fun checkForUpdates(manual: Boolean = true) {
+        if (mutableUiState.value.updateChecking) return
+        viewModelScope.launch {
+            mutableUiState.value = mutableUiState.value.copy(updateChecking = true, updateMessage = null)
+            try {
+                val update = updateChecker.latestUpdate(com.deepseek.meter.BuildConfig.VERSION_NAME)
+                mutableUiState.value = mutableUiState.value.copy(
+                    updateChecking = false,
+                    updateInfo = update,
+                    updateMessage = if (manual && update == null) {
+                        stringsFor(mutableUiState.value.settings.languageCode)[S.upToDate]
+                    } else {
+                        null
+                    },
+                )
+            } catch (_: Exception) {
+                val strings = stringsFor(mutableUiState.value.settings.languageCode)
+                mutableUiState.value = mutableUiState.value.copy(
+                    updateChecking = false,
+                    updateMessage = if (manual) strings[S.updateCheckFailed] else null,
+                )
+            }
+        }
+    }
+
+    fun dismissUpdatePrompt() {
+        mutableUiState.value = mutableUiState.value.copy(updateInfo = null)
+    }
+
+    private fun startStatusPolling() {
+        viewModelScope.launch {
+            while (isActive) {
+                refreshStatusInternal(showLoading = mutableUiState.value.serviceStatus == null)
+                delay(60_000L)
+            }
+        }
+    }
+
+    private suspend fun refreshStatusInternal(showLoading: Boolean) {
+        if (showLoading) mutableUiState.value = mutableUiState.value.copy(statusLoading = true)
+        try {
+            val status = statusRepository.fetchStatus()
+            val previousSignature = mutableUiState.value.serviceStatus?.let { current ->
+                current.overall.name + current.activeIncidents.joinToString { it.id }
+            }
+            val newSignature = status.overall.name + status.activeIncidents.joinToString { it.id }
+            mutableUiState.value = mutableUiState.value.copy(
+                serviceStatus = status,
+                statusLoading = false,
+                statusError = null,
+                statusBannerDismissed = if (previousSignature != newSignature) false else mutableUiState.value.statusBannerDismissed,
+            )
+        } catch (error: Exception) {
+            android.util.Log.w("DeepSeekMeterStatus", "Status refresh failed: ${error.javaClass.simpleName}: ${error.message}")
+            mutableUiState.value = mutableUiState.value.copy(
+                statusLoading = false,
+                statusError = stringsFor(mutableUiState.value.settings.languageCode)[S.statusUnavailable],
+            )
+        }
     }
 
     fun onWebSessionToken(rawToken: String) {

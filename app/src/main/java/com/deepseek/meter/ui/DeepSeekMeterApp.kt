@@ -2,6 +2,7 @@ package com.deepseek.meter.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.webkit.CookieManager
@@ -21,10 +22,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,14 +57,17 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.deepseek.meter.BuildConfig
 import com.deepseek.meter.ui.dashboard.OverviewScreen
 import com.deepseek.meter.ui.localization.LocalAppStrings
 import com.deepseek.meter.ui.localization.S
 import com.deepseek.meter.ui.localization.stringsFor
 import com.deepseek.meter.ui.login.LoginScreen
 import com.deepseek.meter.ui.models.ModelsScreen
+import com.deepseek.meter.ui.status.StatusScreen
 import com.deepseek.meter.ui.settings.SettingsScreen
 
 @Composable
@@ -93,6 +99,10 @@ fun DeepSeekMeterApp(viewModel: MainViewModel = viewModel()) {
                 onRefresh = viewModel::refresh,
                 onLogin = viewModel::openLogin,
                 onLanguageChange = viewModel::setLanguageCode,
+                onRefreshStatus = viewModel::refreshStatus,
+                onDismissStatusBanner = viewModel::dismissStatusBanner,
+                onCheckUpdates = { viewModel.checkForUpdates(true) },
+                onDismissUpdate = viewModel::dismissUpdatePrompt,
                 onDismissError = viewModel::clearError,
                 onRefreshIntervalChange = viewModel::setRefreshInterval,
                 onTodayAlertEnabledChange = viewModel::setTodayAlertEnabled,
@@ -118,6 +128,10 @@ private fun MainScaffold(
     onRefresh: () -> Unit,
     onLogin: () -> Unit,
     onLanguageChange: (String) -> Unit,
+    onRefreshStatus: () -> Unit,
+    onDismissStatusBanner: () -> Unit,
+    onCheckUpdates: () -> Unit,
+    onDismissUpdate: () -> Unit,
     onDismissError: () -> Unit,
     onRefreshIntervalChange: (Int) -> Unit,
     onTodayAlertEnabledChange: (Boolean) -> Unit,
@@ -168,6 +182,21 @@ private fun MainScaffold(
         RechargeOverlay(onClose = { showRecharge = false })
     }
 
+    state.updateInfo?.let { update ->
+        UpdateDialog(
+            latestVersion = update.latestVersion,
+            currentVersion = BuildConfig.VERSION_NAME,
+            onUpdate = {
+                val url = update.apkUrl ?: update.releaseUrl
+                runCatching {
+                    context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                }
+                onDismissUpdate()
+            },
+            onLater = onDismissUpdate,
+        )
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -213,6 +242,12 @@ private fun MainScaffold(
                     onClick = { sectionName = AppSection.Models.name },
                 )
                 NavigationItem(
+                    selected = section == AppSection.Status,
+                    label = strings[S.statusPage],
+                    icon = { Icon(Icons.Outlined.Cloud, contentDescription = null) },
+                    onClick = { sectionName = AppSection.Status.name },
+                )
+                NavigationItem(
                     selected = section == AppSection.Settings,
                     label = strings[S.settings],
                     icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
@@ -227,6 +262,8 @@ private fun MainScaffold(
                 onRefresh = onRefresh,
                 onRecharge = { showRecharge = true },
                 onLogin = onLogin,
+                onOpenStatus = { sectionName = AppSection.Status.name },
+                onDismissStatusBanner = onDismissStatusBanner,
                 onDismissError = onDismissError,
                 modifier = Modifier.padding(innerPadding),
             )
@@ -234,6 +271,12 @@ private fun MainScaffold(
             AppSection.Models -> ModelsScreen(
                 state = state,
                 onLogin = onLogin,
+                modifier = Modifier.padding(innerPadding),
+            )
+
+            AppSection.Status -> StatusScreen(
+                state = state,
+                onRefresh = onRefreshStatus,
                 modifier = Modifier.padding(innerPadding),
             )
 
@@ -255,12 +298,40 @@ private fun MainScaffold(
                 onRingTodayColorChange = onRingTodayColorChange,
                 onResetRingColors = onResetRingColors,
                 onLanguageChange = onLanguageChange,
+                onCheckUpdates = onCheckUpdates,
+                updateChecking = state.updateChecking,
+                updateMessage = state.updateMessage,
                 onLogin = onLogin,
                 onLogout = onLogout,
                 modifier = Modifier.padding(innerPadding),
             )
         }
     }
+}
+
+@Composable
+private fun UpdateDialog(
+    latestVersion: String,
+    currentVersion: String,
+    onUpdate: () -> Unit,
+    onLater: () -> Unit,
+) {
+    val strings = LocalAppStrings.current
+    AlertDialog(
+        onDismissRequest = onLater,
+        title = { Text(strings[S.updateAvailableTitle]) },
+        text = {
+            Text(
+                strings.format(
+                    S.updateAvailableText,
+                    "0" to latestVersion,
+                    "1" to currentVersion,
+                ),
+            )
+        },
+        confirmButton = { TextButton(onClick = onUpdate) { Text(strings[S.updateNow]) } },
+        dismissButton = { TextButton(onClick = onLater) { Text(strings[S.later]) } },
+    )
 }
 
 @Composable

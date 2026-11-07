@@ -48,6 +48,8 @@ fun OverviewScreen(
     onRefresh: () -> Unit,
     onRecharge: () -> Unit,
     onLogin: () -> Unit,
+    onOpenStatus: () -> Unit,
+    onDismissStatusBanner: () -> Unit,
     onDismissError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -59,6 +61,13 @@ fun OverviewScreen(
             .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
+        if (state.serviceStatus?.isAbnormal == true && !state.statusBannerDismissed) {
+            StatusAlertBanner(
+                statusLabel = statusLabel(state),
+                onViewStatus = onOpenStatus,
+                onDismiss = onDismissStatusBanner,
+            )
+        }
         if (state.errorMessage != null) {
             ErrorCard(
                 message = state.errorMessage,
@@ -123,6 +132,45 @@ fun OverviewScreen(
             )
             Spacer(Modifier.height(4.dp))
         }
+    }
+}
+
+@Composable
+private fun StatusAlertBanner(statusLabel: String, onViewStatus: () -> Unit, onDismiss: () -> Unit) {
+    val strings = LocalAppStrings.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                strings[S.statusBannerTitle],
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Text(
+                strings.format(S.statusBannerText, "0" to statusLabel),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onViewStatus) { Text(strings[S.viewStatus]) }
+                TextButton(onClick = onDismiss) { Text(strings[S.dismiss]) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun statusLabel(state: MainUiState): String {
+    val strings = LocalAppStrings.current
+    return when (state.serviceStatus?.overall) {
+        com.deepseek.meter.data.model.ServiceHealth.Degraded -> strings[S.degraded]
+        com.deepseek.meter.data.model.ServiceHealth.PartialOutage -> strings[S.partialOutage]
+        com.deepseek.meter.data.model.ServiceHealth.FullOutage -> strings[S.fullOutage]
+        com.deepseek.meter.data.model.ServiceHealth.Maintenance -> strings[S.maintenance]
+        else -> strings[S.statusUnknown]
     }
 }
 

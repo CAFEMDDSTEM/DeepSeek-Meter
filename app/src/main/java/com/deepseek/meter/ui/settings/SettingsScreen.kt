@@ -63,6 +63,9 @@ fun SettingsScreen(
     onRingTodayColorChange: (Long) -> Unit,
     onResetRingColors: () -> Unit,
     onLanguageChange: (String) -> Unit,
+    onCheckUpdates: () -> Unit,
+    updateChecking: Boolean,
+    updateMessage: String?,
     onLogin: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
@@ -86,6 +89,26 @@ fun SettingsScreen(
                 Text(strings[S.language], style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Text(strings[S.languageDesc], style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 LanguageSelector(selectedCode = settings.languageCode, onSelected = onLanguageChange)
+            }
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        ) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(strings[S.checkUpdates], style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    strings.format(S.versionLabel, "0" to com.deepseek.meter.BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Button(onClick = onCheckUpdates, enabled = !updateChecking) {
+                    Text(if (updateChecking) strings[S.checkingUpdate] else strings[S.checkUpdates])
+                }
+                if (updateMessage != null) {
+                    Text(updateMessage, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
 

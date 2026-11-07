@@ -142,3 +142,57 @@ data class AppSettings(
         val refreshOptions = listOf(0, 15, 30, 60, 300, 600)
     }
 }
+
+enum class ServiceHealth {
+    Operational,
+    Degraded,
+    PartialOutage,
+    FullOutage,
+    Maintenance,
+    Unknown,
+}
+
+data class StatusComponent(
+    val id: String,
+    val name: String,
+    val description: String,
+    val sectionId: String?,
+    val health: ServiceHealth,
+    val uptimePercent: Double?,
+)
+
+data class StatusSection(
+    val id: String,
+    val name: String,
+    val components: List<StatusComponent>,
+)
+
+data class StatusIncident(
+    val id: String,
+    val title: String,
+    val status: String,
+    val description: String,
+    val startEpochSecond: Long?,
+    val closeEpochSecond: Long?,
+    val affectedComponents: List<String>,
+)
+
+data class DeepSeekServiceStatus(
+    val overall: ServiceHealth,
+    val sections: List<StatusSection>,
+    val ungroupedComponents: List<StatusComponent>,
+    val activeIncidents: List<StatusIncident>,
+    val recentIncidents: List<StatusIncident>,
+    val lastUpdated: Instant,
+) {
+    val isAbnormal: Boolean
+        get() = overall != ServiceHealth.Operational && overall != ServiceHealth.Unknown
+}
+
+data class AppUpdateInfo(
+    val latestVersion: String,
+    val releaseUrl: String,
+    val apkUrl: String?,
+    val releaseNotes: String,
+)
+

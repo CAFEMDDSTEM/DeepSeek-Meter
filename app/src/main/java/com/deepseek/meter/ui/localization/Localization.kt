@@ -51,6 +51,21 @@ object S {
     const val notificationChannelDesc = "notificationChannelDesc"; const val todayAlertTitle = "todayAlertTitle"
     const val todayAlertText = "todayAlertText"; const val lowBalanceTitle = "lowBalanceTitle"
     const val lowBalanceText = "lowBalanceText"; const val unnamedKey = "unnamedKey"
+    const val statusPage = "statusPage"; const val statusDescription = "statusDescription"
+    const val allOperational = "allOperational"; const val degraded = "degraded"
+    const val partialOutage = "partialOutage"; const val fullOutage = "fullOutage"
+    const val maintenance = "maintenance"; const val statusUnknown = "statusUnknown"
+    const val components = "components"; const val uptime = "uptime"
+    const val activeIncidents = "activeIncidents"; const val noActiveIncidents = "noActiveIncidents"
+    const val recentIncidents = "recentIncidents"; const val noRecentIncidents = "noRecentIncidents"
+    const val lastChecked = "lastChecked"; const val statusUnavailable = "statusUnavailable"
+    const val statusBannerTitle = "statusBannerTitle"; const val statusBannerText = "statusBannerText"
+    const val viewStatus = "viewStatus"; const val dismiss = "dismiss"
+    const val checkUpdates = "checkUpdates"; const val checkingUpdate = "checkingUpdate"
+    const val upToDate = "upToDate"; const val updateAvailableTitle = "updateAvailableTitle"
+    const val updateAvailableText = "updateAvailableText"; const val updateNow = "updateNow"
+    const val later = "later"; const val versionLabel = "versionLabel"
+    const val updateCheckFailed = "updateCheckFailed"
 }
 
 private val EN = mapOf(
@@ -381,6 +396,110 @@ private val ES = mapOf(
     S.lowBalanceTitle to "El saldo de DeepSeek es bajo", S.lowBalanceText to "Saldo actual: {0}; umbral: {1}", S.unnamedKey to "Key sin nombre"
 )
 
+private val EN_EXTRA = mapOf(
+    S.statusPage to "DeepSeek Status", S.statusDescription to "Live service and system status provided by the official DeepSeek Status page.",
+    S.allOperational to "All systems operational", S.degraded to "Degraded performance", S.partialOutage to "Partial outage",
+    S.fullOutage to "Full outage", S.maintenance to "Under maintenance", S.statusUnknown to "Status unavailable",
+    S.components to "Components", S.uptime to "90-day uptime", S.activeIncidents to "Active incidents",
+    S.noActiveIncidents to "No active incidents", S.recentIncidents to "Recent incidents", S.noRecentIncidents to "No recent incidents",
+    S.lastChecked to "Last checked: {0}", S.statusUnavailable to "Unable to load the official status page.",
+    S.statusBannerTitle to "DeepSeek service issue", S.statusBannerText to "Current status: {0}. Some services may be affected.",
+    S.viewStatus to "View status", S.dismiss to "Dismiss", S.checkUpdates to "Check for updates",
+    S.checkingUpdate to "Checking…", S.upToDate to "You are using the latest version.", S.updateAvailableTitle to "Update available",
+    S.updateAvailableText to "Version {0} is available. Current version: {1}.", S.updateNow to "Update now", S.later to "Later",
+    S.versionLabel to "Version {0}", S.updateCheckFailed to "Unable to check for updates. Please try again later."
+)
+private val ZH_EXTRA = mapOf(
+    S.statusPage to "DeepSeek 服务状态", S.statusDescription to "以下信息来自 DeepSeek 官方 Status 页面。",
+    S.allOperational to "所有系统运行正常", S.degraded to "服务性能下降", S.partialOutage to "部分服务中断",
+    S.fullOutage to "服务全面中断", S.maintenance to "维护中", S.statusUnknown to "状态不可用",
+    S.components to "服务组件", S.uptime to "90 天可用性", S.activeIncidents to "当前事件",
+    S.noActiveIncidents to "当前没有活动事件", S.recentIncidents to "最近事件", S.noRecentIncidents to "最近没有事件",
+    S.lastChecked to "最后检查：{0}", S.statusUnavailable to "无法加载官方状态页面。",
+    S.statusBannerTitle to "DeepSeek 服务状态异常", S.statusBannerText to "当前状态：{0}，部分服务可能受到影响。",
+    S.viewStatus to "查看状态", S.dismiss to "关闭", S.checkUpdates to "检查更新",
+    S.checkingUpdate to "正在检查…", S.upToDate to "当前已是最新版本。", S.updateAvailableTitle to "发现新版本",
+    S.updateAvailableText to "新版本 {0} 可用，当前版本 {1}。", S.updateNow to "立即更新", S.later to "稍后",
+    S.versionLabel to "版本 {0}", S.updateCheckFailed to "检查更新失败，请稍后重试。"
+)
+private val RU_EXTRA = mapOf(
+    S.statusPage to "Статус DeepSeek", S.statusDescription to "Актуальный статус сервисов с официальной страницы DeepSeek Status.",
+    S.allOperational to "Все системы работают", S.degraded to "Снижение производительности", S.partialOutage to "Частичный сбой",
+    S.fullOutage to "Полный сбой", S.maintenance to "Обслуживание", S.statusUnknown to "Статус недоступен",
+    S.components to "Компоненты", S.uptime to "Доступность за 90 дней", S.activeIncidents to "Активные инциденты",
+    S.noActiveIncidents to "Активных инцидентов нет", S.recentIncidents to "Последние инциденты", S.noRecentIncidents to "Последних инцидентов нет",
+    S.lastChecked to "Проверено: {0}", S.statusUnavailable to "Не удалось загрузить официальную страницу статуса.",
+    S.statusBannerTitle to "Проблема с сервисом DeepSeek", S.statusBannerText to "Текущий статус: {0}. Некоторые сервисы могут быть недоступны.",
+    S.viewStatus to "Открыть статус", S.dismiss to "Закрыть", S.checkUpdates to "Проверить обновления",
+    S.checkingUpdate to "Проверка…", S.upToDate to "Установлена последняя версия.", S.updateAvailableTitle to "Доступно обновление",
+    S.updateAvailableText to "Доступна версия {0}. Текущая версия: {1}.", S.updateNow to "Обновить", S.later to "Позже",
+    S.versionLabel to "Версия {0}", S.updateCheckFailed to "Не удалось проверить обновления."
+)
+private val JA_EXTRA = mapOf(
+    S.statusPage to "DeepSeek ステータス", S.statusDescription to "DeepSeek 公式ステータスページの最新情報です。",
+    S.allOperational to "すべて正常稼働中", S.degraded to "性能低下", S.partialOutage to "一部停止",
+    S.fullOutage to "全面停止", S.maintenance to "メンテナンス中", S.statusUnknown to "ステータス取得不可",
+    S.components to "サービスコンポーネント", S.uptime to "90日間の稼働率", S.activeIncidents to "発生中の障害",
+    S.noActiveIncidents to "発生中の障害はありません", S.recentIncidents to "最近の障害", S.noRecentIncidents to "最近の障害はありません",
+    S.lastChecked to "最終確認：{0}", S.statusUnavailable to "公式ステータスページを読み込めません。",
+    S.statusBannerTitle to "DeepSeek サービス障害", S.statusBannerText to "現在の状態：{0}。一部サービスに影響しています。",
+    S.viewStatus to "ステータスを見る", S.dismiss to "閉じる", S.checkUpdates to "アップデートを確認",
+    S.checkingUpdate to "確認中…", S.upToDate to "最新バージョンです。", S.updateAvailableTitle to "アップデートがあります",
+    S.updateAvailableText to "バージョン {0} が利用可能です。現在：{1}。", S.updateNow to "今すぐ更新", S.later to "後で",
+    S.versionLabel to "バージョン {0}", S.updateCheckFailed to "アップデートを確認できませんでした。"
+)
+private val KO_EXTRA = mapOf(
+    S.statusPage to "DeepSeek 상태", S.statusDescription to "DeepSeek 공식 상태 페이지의 실시간 정보입니다.",
+    S.allOperational to "모든 시스템 정상", S.degraded to "성능 저하", S.partialOutage to "부분 장애",
+    S.fullOutage to "전체 장애", S.maintenance to "점검 중", S.statusUnknown to "상태 확인 불가",
+    S.components to "서비스 구성 요소", S.uptime to "90일 가동률", S.activeIncidents to "진행 중인 장애",
+    S.noActiveIncidents to "진행 중인 장애가 없습니다", S.recentIncidents to "최근 장애", S.noRecentIncidents to "최근 장애가 없습니다",
+    S.lastChecked to "마지막 확인: {0}", S.statusUnavailable to "공식 상태 페이지를 불러올 수 없습니다.",
+    S.statusBannerTitle to "DeepSeek 서비스 장애", S.statusBannerText to "현재 상태: {0}. 일부 서비스가 영향을 받을 수 있습니다.",
+    S.viewStatus to "상태 보기", S.dismiss to "닫기", S.checkUpdates to "업데이트 확인",
+    S.checkingUpdate to "확인 중…", S.upToDate to "최신 버전입니다.", S.updateAvailableTitle to "업데이트 가능",
+    S.updateAvailableText to "버전 {0}을 사용할 수 있습니다. 현재 버전: {1}.", S.updateNow to "지금 업데이트", S.later to "나중에",
+    S.versionLabel to "버전 {0}", S.updateCheckFailed to "업데이트를 확인할 수 없습니다."
+)
+private val DE_EXTRA = mapOf(
+    S.statusPage to "DeepSeek-Status", S.statusDescription to "Live-Status der offiziellen DeepSeek-Statusseite.",
+    S.allOperational to "Alle Systeme betriebsbereit", S.degraded to "Leistung beeinträchtigt", S.partialOutage to "Teilausfall",
+    S.fullOutage to "Komplettausfall", S.maintenance to "Wartung", S.statusUnknown to "Status nicht verfügbar",
+    S.components to "Komponenten", S.uptime to "Verfügbarkeit (90 Tage)", S.activeIncidents to "Aktive Störungen",
+    S.noActiveIncidents to "Keine aktiven Störungen", S.recentIncidents to "Letzte Störungen", S.noRecentIncidents to "Keine aktuellen Störungen",
+    S.lastChecked to "Zuletzt geprüft: {0}", S.statusUnavailable to "Offizielle Statusseite konnte nicht geladen werden.",
+    S.statusBannerTitle to "DeepSeek-Serviceproblem", S.statusBannerText to "Aktueller Status: {0}. Einige Dienste können betroffen sein.",
+    S.viewStatus to "Status anzeigen", S.dismiss to "Schließen", S.checkUpdates to "Nach Updates suchen",
+    S.checkingUpdate to "Prüfe…", S.upToDate to "Die neueste Version ist installiert.", S.updateAvailableTitle to "Update verfügbar",
+    S.updateAvailableText to "Version {0} ist verfügbar. Aktuell: {1}.", S.updateNow to "Jetzt aktualisieren", S.later to "Später",
+    S.versionLabel to "Version {0}", S.updateCheckFailed to "Updates konnten nicht geprüft werden."
+)
+private val IT_EXTRA = mapOf(
+    S.statusPage to "Stato DeepSeek", S.statusDescription to "Stato in tempo reale dalla pagina ufficiale DeepSeek Status.",
+    S.allOperational to "Tutti i sistemi operativi", S.degraded to "Prestazioni ridotte", S.partialOutage to "Interruzione parziale",
+    S.fullOutage to "Interruzione totale", S.maintenance to "Manutenzione", S.statusUnknown to "Stato non disponibile",
+    S.components to "Componenti", S.uptime to "Disponibilità 90 giorni", S.activeIncidents to "Incidenti attivi",
+    S.noActiveIncidents to "Nessun incidente attivo", S.recentIncidents to "Incidenti recenti", S.noRecentIncidents to "Nessun incidente recente",
+    S.lastChecked to "Ultimo controllo: {0}", S.statusUnavailable to "Impossibile caricare la pagina di stato ufficiale.",
+    S.statusBannerTitle to "Problema del servizio DeepSeek", S.statusBannerText to "Stato attuale: {0}. Alcuni servizi potrebbero essere interessati.",
+    S.viewStatus to "Vedi stato", S.dismiss to "Chiudi", S.checkUpdates to "Controlla aggiornamenti",
+    S.checkingUpdate to "Controllo…", S.upToDate to "Hai già l'ultima versione.", S.updateAvailableTitle to "Aggiornamento disponibile",
+    S.updateAvailableText to "La versione {0} è disponibile. Versione attuale: {1}.", S.updateNow to "Aggiorna ora", S.later to "Più tardi",
+    S.versionLabel to "Versione {0}", S.updateCheckFailed to "Impossibile controllare gli aggiornamenti."
+)
+private val ES_EXTRA = mapOf(
+    S.statusPage to "Estado de DeepSeek", S.statusDescription to "Estado en directo de la página oficial DeepSeek Status.",
+    S.allOperational to "Todos los sistemas operativos", S.degraded to "Rendimiento degradado", S.partialOutage to "Interrupción parcial",
+    S.fullOutage to "Interrupción total", S.maintenance to "En mantenimiento", S.statusUnknown to "Estado no disponible",
+    S.components to "Componentes", S.uptime to "Disponibilidad de 90 días", S.activeIncidents to "Incidentes activos",
+    S.noActiveIncidents to "No hay incidentes activos", S.recentIncidents to "Incidentes recientes", S.noRecentIncidents to "No hay incidentes recientes",
+    S.lastChecked to "Última comprobación: {0}", S.statusUnavailable to "No se pudo cargar la página oficial de estado.",
+    S.statusBannerTitle to "Problema en el servicio DeepSeek", S.statusBannerText to "Estado actual: {0}. Algunos servicios pueden verse afectados.",
+    S.viewStatus to "Ver estado", S.dismiss to "Cerrar", S.checkUpdates to "Buscar actualizaciones",
+    S.checkingUpdate to "Comprobando…", S.upToDate to "Ya tienes la última versión.", S.updateAvailableTitle to "Actualización disponible",
+    S.updateAvailableText to "La versión {0} está disponible. Versión actual: {1}.", S.updateNow to "Actualizar ahora", S.later to "Más tarde",
+    S.versionLabel to "Versión {0}", S.updateCheckFailed to "No se pudieron buscar actualizaciones."
+)
 class AppStrings(private val values: Map<String, String>) {
     operator fun get(key: String): String = values[key] ?: EN[key] ?: key
 
@@ -392,14 +511,14 @@ class AppStrings(private val values: Map<String, String>) {
 }
 
 fun stringsFor(code: String): AppStrings = when (code.lowercase()) {
-    "zh" -> AppStrings(ZH)
-    "ru" -> AppStrings(RU)
-    "ja" -> AppStrings(JA)
-    "ko" -> AppStrings(KO)
-    "de" -> AppStrings(DE)
-    "it" -> AppStrings(IT)
-    "es" -> AppStrings(ES)
-    else -> AppStrings(EN)
+    "zh" -> AppStrings(ZH + ZH_EXTRA)
+    "ru" -> AppStrings(RU + RU_EXTRA)
+    "ja" -> AppStrings(JA + JA_EXTRA)
+    "ko" -> AppStrings(KO + KO_EXTRA)
+    "de" -> AppStrings(DE + DE_EXTRA)
+    "it" -> AppStrings(IT + IT_EXTRA)
+    "es" -> AppStrings(ES + ES_EXTRA)
+    else -> AppStrings(EN + EN_EXTRA)
 }
 
 val LocalAppStrings = staticCompositionLocalOf { AppStrings(EN) }
